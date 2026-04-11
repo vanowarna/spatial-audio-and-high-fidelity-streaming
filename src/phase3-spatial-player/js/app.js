@@ -43,6 +43,7 @@ class SpatialAudioLab {
     // Wire 3D scene callbacks to audio engine
     this.scene.onSourceMoved = (id, x, y, z) => {
       this.engine.setSourcePosition(id, x, y, z);
+      this._updateSourceCardPosition(id, x, z);
     };
 
     this.scene.onListenerMoved = (x, y, z) => {
@@ -192,12 +193,83 @@ class SpatialAudioLab {
       <span class="source-info">
         (${source.position.x.toFixed(1)}, ${source.position.z.toFixed(1)})
       </span>
+      <div class="source-actions">
+        <button class="source-action-btn source-mute-btn" type="button" title="Mute source">Mute</button>
+        <button class="source-action-btn source-delete-btn" type="button" title="Delete source">Delete</button>
+      </div>
     `;
     card.addEventListener('click', () => this.selectSource(source.id));
+
+    const muteBtn = card.querySelector('.source-mute-btn');
+    muteBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this._toggleSourceMute(source.id);
+    });
+
+    const deleteBtn = card.querySelector('.source-delete-btn');
+    deleteBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this._deleteSource(source.id);
+    });
+
     list.appendChild(card);
   }
 
+  _updateSourceCardPosition(id, x, z) {
+    const card = document.querySelector(`.source-card[data-id="${id}"]`);
+    if (!card) return;
+
+    const info = card.querySelector('.source-info');
+    if (info) {
+      info.textContent = `(${x.toFixed(1)}, ${z.toFixed(1)})`;
+    }
+  }
+
+  _toggleSourceMute(id) {
+    const source = this.engine.sources.get(id);
+    if (!source) return;
+
+    const isMuted = !source.muted;
+    this.engine.setSourceMuted(id, isMuted);
+    this._setSourceCardMutedState(id, isMuted);
+  }
+
+  _setSourceCardMutedState(id, isMuted) {
+    const card = document.querySelector(`.source-card[data-id="${id}"]`);
+    if (!card) return;
+
+    card.classList.toggle('muted', isMuted);
+    const muteBtn = card.querySelector('.source-mute-btn');
+    if (muteBtn) {
+      muteBtn.textContent = isMuted ? 'Unmute' : 'Mute';
+      muteBtn.title = isMuted ? 'Unmute source' : 'Mute source';
+    }
+  }
+
+  _deleteSource(id) {
+    const source = this.engine.sources.get(id);
+    if (!source) return;
+
+    this.engine.removeSource(id);
+    this.scene.removeSourceMesh(id);
+
+    const card = document.querySelector(`.source-card[data-id="${id}"]`);
+    if (card) card.remove();
+
+    if (this.selectedSourceId === id) {
+      const remainingIds = [...this.engine.sources.keys()];
+      if (remainingIds.length > 0) {
+        this.selectSource(remainingIds[0]);
+      } else {
+        this.selectedSourceId = null;
+        this.scene.highlightSource(null);
+      }
+    }
+  }
+
   selectSource(id) {
+    if (!this.engine.sources.has(id)) return;
+
     this.selectedSourceId = id;
 
     // Update UI

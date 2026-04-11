@@ -160,6 +160,15 @@ export class AudioEngine {
     src.gainNode.gain.setTargetAtTime(value, this.ctx.currentTime, 0.02);
   }
 
+  setSourceMuted(id, muted) {
+    const src = this.sources.get(id);
+    if (!src) return false;
+
+    src.muted = !!muted;
+    src.gainNode.gain.setTargetAtTime(src.muted ? 0 : 1.0, this.ctx.currentTime, 0.02);
+    return true;
+  }
+
   // --- Codec switching ---
   addCodecVariant(sourceId, codec, bitrate, buffer) {
     const src = this.sources.get(sourceId);
@@ -225,6 +234,7 @@ export class AudioEngine {
       node.buffer = src.buffer;
       node.loop = true;
       node.connect(src.gainNode);
+      src.gainNode.gain.setValueAtTime(src.muted ? 0 : 1.0, this.ctx.currentTime);
       const offset = this.pauseOffset % src.buffer.duration;
       node.start(0, offset);
       src.sourceNode = node;
