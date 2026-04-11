@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spatial Audio Lab</title>
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Three.js via importmap (no build step) -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.162.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.162.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+
+  <!-- Loading overlay -->
+  <div id="loading-overlay">
+    <div class="loader-ring"></div>
+    <div class="loader-text" id="loading-status">Initializing Spatial Audio Lab...</div>
+  </div>
+
+  <!-- Main app -->
+  <div id="app">
+
+    <!-- ─── HEADER ─── -->
+    <header id="header" class="glass">
+      <div style="display:flex; align-items:center;">
+        <h1>Spatial Audio Lab</h1>
+        <span class="subtitle">HRTF 3D Audio &middot; Codec Analysis &middot; Stress Testing</span>
+      </div>
+      <div class="header-actions">
+        <div class="mode-toggle">
+          <button data-mode="mono">Mono</button>
+          <button data-mode="stereo">Stereo</button>
+          <button data-mode="spatial" class="active">Spatial</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ─── MAIN ─── -->
+    <main id="main">
+
+      <!-- LEFT: Source list panel -->
+      <aside id="source-panel">
+        <h2>Sound Sources</h2>
+        <div id="source-list"></div>
+        <button id="add-source-btn">+ Add Source</button>
+
+        <div style="margin-top:auto; padding-top:12px;">
+          <h2 style="margin-bottom:8px;">Upload Audio</h2>
+          <div id="upload-zone" class="upload-zone">
+            Drop audio files here<br>
+            <span style="font-size:11px; color:var(--text-dim)">WAV, MP3, OGG, M4A</span>
+          </div>
+          <input type="file" id="file-input" accept="audio/*" multiple hidden>
+        </div>
+      </aside>
+
+      <!-- CENTER: 3D Scene -->
+      <section id="scene-container">
+        <div class="scene-overlay glass-light">
+          Drag objects to move &middot; Scroll to zoom &middot; Right-click to orbit
+        </div>
+        <div id="stress-warning" class="stress-warning">
+          &#9888; Network Stress Active &middot; Glitches: <span id="glitch-count">0</span>
+        </div>
+      </section>
+
+      <!-- RIGHT: Visualizer + controls -->
+      <aside id="right-panel">
+
+        <!-- Frequency visualizer -->
+        <div>
+          <h2>Frequency Spectrum</h2>
+          <div class="viz-container" style="margin-top:8px;">
+            <canvas id="freq-canvas" style="height:120px;"></canvas>
+          </div>
+        </div>
+
+        <!-- Waveform -->
+        <div>
+          <h2>Waveform</h2>
+          <div class="viz-container" style="margin-top:8px;">
+            <canvas id="wave-canvas" style="height:80px;"></canvas>
+          </div>
+        </div>
+
+        <!-- Codec info -->
+        <div>
+          <h2>Active Codec</h2>
+          <div class="codec-info" style="margin-top:8px;">
+            <div class="label">Current</div>
+            <div class="value" id="codec-info-label">Original (Uncompressed)</div>
+          </div>
+        </div>
+
+        <!-- Stress Test -->
+        <div>
+          <h2>Network Stress Test</h2>
+          <div id="stress-panel" style="margin-top:8px; padding:12px; display:flex; flex-direction:column; gap:10px;"
+               class="glass-light">
+            <div class="slider-group">
+              <label>Loss</label>
+              <input type="range" id="loss-slider" class="stress-slider"
+                     min="0" max="30" value="0" style="flex:1;">
+              <span class="slider-value" id="loss-value">0%</span>
+            </div>
+            <div class="slider-group">
+              <label>Jitter</label>
+              <input type="range" id="jitter-slider" class="stress-slider"
+                     min="0" max="500" value="0" step="10" style="flex:1;">
+              <span class="slider-value" id="jitter-value">0ms</span>
+            </div>
+            <button class="btn" id="reset-stress" style="font-size:12px; padding:6px;">
+              Reset Stress
+            </button>
+          </div>
+        </div>
+
+        <!-- Keyboard shortcuts -->
+        <div style="margin-top:auto;">
+          <div style="font-size:11px; color:var(--text-dim); line-height:1.8;">
+            <strong style="color:var(--text-secondary);">Shortcuts</strong><br>
+            <kbd style="padding:1px 5px; border-radius:3px; border:1px solid var(--border-glass); font-size:10px;">Space</kbd> Play/Pause &nbsp;
+            <kbd style="padding:1px 5px; border-radius:3px; border:1px solid var(--border-glass); font-size:10px;">1-8</kbd> Select source &nbsp;
+            <kbd style="padding:1px 5px; border-radius:3px; border:1px solid var(--border-glass); font-size:10px;">R</kbd> Reset
+          </div>
+        </div>
+
+      </aside>
+    </main>
+
+    <!-- ─── BOTTOM CONTROLS ─── -->
+    <footer id="controls" class="glass">
+
+      <!-- Transport -->
+      <div class="transport">
+        <button id="btn-play" class="btn-play" title="Play/Pause">&#9654;</button>
+        <button id="btn-stop" class="btn-icon btn" title="Stop">&#9632;</button>
+      </div>
+
+      <!-- Volume -->
+      <div class="volume-group">
+        <span class="vol-icon">&#128264;</span>
+        <input type="range" id="master-volume" min="0" max="1" step="0.01" value="0.8">
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Codec selector -->
+      <div class="select-wrapper">
+        <label>Codec</label>
+        <select id="codec-select">
+          <option value="original">Original</option>
+          <option value="mp3">MP3</option>
+          <option value="aac">AAC</option>
+          <option value="opus">Opus</option>
+        </select>
+      </div>
+
+      <div class="select-wrapper">
+        <label>Bitrate</label>
+        <select id="bitrate-select" disabled>
+          <option value="">N/A</option>
+        </select>
+      </div>
+
+    </footer>
+  </div>
+
+  <!-- App entry point -->
+  <script type="module" src="js/app.js"></script>
+
+</body>
+</html>
