@@ -1,4 +1,4 @@
-name: Deploy Phase 3 to GitHub Pages
+...name: Deploy Phase 3 to GitHub Pages
 
 on:
   push:
@@ -9,6 +9,9 @@ permissions:
   contents: read
   pages: write
   id-token: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 concurrency:
   group: pages
