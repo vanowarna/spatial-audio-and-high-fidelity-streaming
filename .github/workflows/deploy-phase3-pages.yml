@@ -1,4 +1,4 @@
-...name: Deploy Phase 3 to GitHub Pages
+name: Deploy Phase 3 to GitHub Pages
 
 on:
   push:
