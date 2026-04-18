@@ -51,7 +51,3 @@ spatial-audio-and-high-fidelity-streaming/
 ### Phase 3 — Spatial Player (GitHub Codespaces / local)
 TBD
 
-## Team
-- Member 1
-- Member 2
-- Member 3
