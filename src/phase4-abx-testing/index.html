@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ABX Listening Test — Spatial Audio Project</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Welcome screen -->
+  <div id="screen-welcome" class="screen active">
+    <div class="card" style="max-width:540px;">
+      <h1>ABX Listening Test</h1>
+      <p class="subtitle">Spatial Audio & High-Fidelity Streaming</p>
+
+      <div class="info-box">
+        <p>This test evaluates whether you can distinguish between original and compressed audio.
+           You will hear three clips per trial: <strong>A</strong> (reference), <strong>B</strong> (alternate),
+           and <strong>X</strong> (unknown). Your task is to decide if <strong>X = A</strong> or <strong>X = B</strong>.</p>
+      </div>
+
+      <div class="form-group">
+        <label>Participant ID (or name)</label>
+        <input type="text" id="participant-id" placeholder="e.g. P01 or your initials">
+      </div>
+
+      <div class="info-box" style="font-size:12px; color:var(--text-dim);">
+        <strong>Requirements:</strong> Use headphones in a quiet environment. The test takes approximately 10-15 minutes.
+      </div>
+
+      <button class="btn-primary" id="btn-start">Begin Test</button>
+    </div>
+  </div>
+
+  <!-- Test screen -->
+  <div id="screen-test" class="screen">
+    <div class="card" style="max-width:640px;">
+
+      <!-- Progress -->
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <div class="progress-label">
+        Trial <span id="trial-current">1</span> of <span id="trial-total">--</span>
+        &nbsp;&middot;&nbsp;
+        <span id="trial-codec" class="codec-badge">--</span>
+        <span id="trial-bitrate" class="bitrate-badge">-- kbps</span>
+      </div>
+
+      <!-- Audio players -->
+      <div class="player-row">
+        <div class="player-card" id="player-a">
+          <div class="player-label">A</div>
+          <button class="btn-play" id="btn-a">&#9654;</button>
+          <div class="player-status" id="status-a">Reference</div>
+        </div>
+
+        <div class="player-card" id="player-b">
+          <div class="player-label">B</div>
+          <button class="btn-play" id="btn-b">&#9654;</button>
+          <div class="player-status" id="status-b">Alternate</div>
+        </div>
+
+        <div class="player-card highlight" id="player-x">
+          <div class="player-label">X</div>
+          <button class="btn-play" id="btn-x">&#9654;</button>
+          <div class="player-status" id="status-x">Unknown</div>
+        </div>
+      </div>
+
+      <!-- Answer -->
+      <div class="answer-section">
+        <p class="answer-prompt">X is the same as:</p>
+        <div class="answer-buttons">
+          <button class="btn-answer" id="ans-a" data-answer="A">X = A</button>
+          <button class="btn-answer" id="ans-b" data-answer="B">X = B</button>
+        </div>
+
+        <div class="confidence-section">
+          <label>Confidence</label>
+          <div class="confidence-buttons">
+            <button class="btn-conf" data-conf="1">Guessing</button>
+            <button class="btn-conf" data-conf="2">Somewhat sure</button>
+            <button class="btn-conf active" data-conf="3">Confident</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="btn-next" disabled>Next Trial &rarr;</button>
+
+      <!-- Listen counter -->
+      <div class="listen-counter">
+        Listens: A(<span id="count-a">0</span>) B(<span id="count-b">0</span>) X(<span id="count-x">0</span>)
+      </div>
+    </div>
+  </div>
+
+  <!-- Results screen -->
+  <div id="screen-results" class="screen">
+    <div class="card" style="max-width:700px;">
+      <h1>Test Complete</h1>
+      <p class="subtitle">Thank you for participating!</p>
+
+      <!-- Summary -->
+      <div class="results-summary" id="results-summary"></div>
+
+      <!-- Per-codec breakdown -->
+      <div id="results-breakdown"></div>
+
+      <!-- Actions -->
+      <div style="display:flex; gap:12px; margin-top:24px;">
+        <button class="btn-primary" id="btn-download-csv">Download Results (CSV)</button>
+        <button class="btn-secondary" id="btn-download-json">Download (JSON)</button>
+        <button class="btn-secondary" id="btn-restart">Restart Test</button>
+      </div>
+
+      <div class="info-box" style="margin-top:16px; font-size:12px;">
+        <strong>For the report:</strong> Upload the CSV to the Phase 4 analysis notebook in Google Colab for statistical analysis and visualizations.
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/abx-test.js"></script>
+</body>
+</html>

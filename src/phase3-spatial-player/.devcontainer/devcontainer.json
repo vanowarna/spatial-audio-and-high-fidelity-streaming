@@ -1,0 +1,18 @@
+{
+  "name": "Spatial Audio Lab",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "forwardPorts": [5500],
+  "postCreateCommand": "npm install -g live-server && echo '✅ Ready! Run: live-server --port=5500'",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ritwickdey.LiveServer",
+        "dbaeumer.vscode-eslint"
+      ],
+      "settings": {
+        "liveServer.settings.port": 5500,
+        "liveServer.settings.donotShowInfoMsg": true
+      }
+    }
+  }
+}
