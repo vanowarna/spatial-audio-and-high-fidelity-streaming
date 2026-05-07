@@ -7,7 +7,7 @@
 
 ## Slide 1 — Title (0:00 → 0:10)
 
-> "Good morning. We are presenting Project 4: Spatial Audio and High-Fidelity Streaming.
+> We are presenting Project 4: Spatial Audio and High-Fidelity Streaming.
 > We compare three perceptual codecs — MP3, AAC, and Opus — for low-latency binaural delivery,
 > and demonstrate a working spatial audio web player. I'll keep us to five minutes."
 
@@ -121,17 +121,17 @@
 
 ## Timing checklist
 
-| Slide | Cue word                        | Run-time   |
-|-------|---------------------------------|------------|
-| 1     | "Project 4"                     | 0:00 → 0:10 |
-| 2     | "Bandwidth gap"                 | 0:10 → 0:45 |
-| 3     | "Four concrete questions"       | 0:45 → 1:10 |
-| 4     | "FFmpeg with libfdk-aac"        | 1:10 → 1:50 |
-| 5     | "Rate–distortion curves split"  | 1:50 → 2:30 |
-| 6     | "Pilot ABX results align"       | 2:30 → 3:05 |
-| 7     | "Network impairments hit harder"| 3:05 → 3:35 |
-| 8     | **"Now the live demonstration"**| 3:35 → 4:50 |
-| 9     | "To wrap up"                    | 4:50 → 4:55 |
-| 10    | "Thank you"                     | 4:55 → 5:00 |
+| Slide | Key Cue / Topic                  | Presenter     | Time Allocation | Duration |
+|------:|----------------------------------|----------------|-----------------|----------|
+| 1     | Project 4 – Introduction         | Jackie         | 0:00 → 0:10     | 0:10     |
+| 2     | Bandwidth Gap                    | Jackie         | 0:10 → 0:45     | 0:35     |
+| 3     | Four Concrete Research Questions | Jackie         | 0:45 → 1:10     | 0:25     |
+| 4     | FFmpeg with libfdk-aac           | Jackie         | 1:10 → 1:50     | 0:40     |
+| 5     | Split Rate–Distortion Curves     | Jackie         | 1:50 → 2:30     | 0:40     |
+| 6     | Pilot ABX Results Alignment      | Madeleine      | 2:30 → 3:05     | 0:35     |
+| 7     | Impact of Network Impairments    | Madeleine      | 3:05 → 3:35     | 0:30     |
+| 8     | Live Demonstration               | Vano           | 3:35 → 4:50     | 1:15     |
+| 9     | Conclusion & Key Takeaways       | Vano           | 4:50 → 4:55     | 0:05     |
+| 10    | Thank You / Q&A Transition       | Vano           | 4:55 → 5:00     | 0:05     |
 
 **Total: 5:00 sharp.** If demo runs long, trim Slide 5 and Slide 7 narration; never trim demo.
