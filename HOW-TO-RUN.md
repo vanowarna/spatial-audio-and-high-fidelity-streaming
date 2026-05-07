@@ -25,46 +25,51 @@ spatial-audio-and-high-fidelity-streaming/
 │
 ├── HOW-TO-RUN.md              ← You are here
 ├── README.md                  ← Project overview
+├── index.html                 ← Project homepage (GitHub Pages)
 │
-├── ref-docs/                  ← Reference materials
+├── ref-docs/                  ← Reference materials (read-only)
 │   ├── init-docs-project-list.pdf
 │   ├── project-requirements.md
 │   ├── project-plan.md
-│   └── from-teammate/
-│       └── MultiMed_project.ipynb   (original teammate notebook)
+│   ├── from-teammate/
+│   │   └── MultiMed_project.ipynb        (original teammate notebook)
+│   ├── prior-drafts/                     (earlier draft of report + slides)
+│   └── ref-output-style/                 (style references for previous projects)
 │
 ├── src/
 │   ├── phase2-codec-analysis/
-│   │   └── Phase2_Codec_Analysis.ipynb    ★ Google Colab
+│   │   └── Phase2_Codec_Analysis.ipynb   ★ Google Colab
 │   │
 │   ├── phase3-spatial-player/
-│   │   ├── index.html                     ★ GitHub Codespaces
+│   │   ├── index.html                    ★ GitHub Codespaces
 │   │   ├── css/style.css
-│   │   ├── js/                            (6 JS modules)
-│   │   ├── vercel.json
-│   │   └── .devcontainer/
+│   │   ├── js/                           (6 JS modules)
+│   │   └── vercel.json
 │   │
 │   ├── phase4-abx-testing/
-│   │   ├── index.html                     ★ GitHub Codespaces
+│   │   ├── index.html                    ★ GitHub Codespaces
 │   │   ├── css/style.css
 │   │   ├── js/abx-test.js
-│   │   └── Phase4_ABX_Analysis.ipynb      ★ Google Colab
+│   │   └── Phase4_ABX_Analysis.ipynb     ★ Google Colab
 │   │
 │   └── phase5-streaming-stress-test/
-│       └── Phase5_Stress_Test.ipynb       ★ Google Colab
+│       └── Phase5_Stress_Test.ipynb      ★ Google Colab
 │
-├── report/
-│   ├── Spatial_Audio_Report.docx
-│   ├── Spatial_Audio_Presentation.pptx
-│   └── figures/
+├── report/                              ← Build pipeline + figures
+│   ├── build_report.py                   (python-docx report builder)
+│   ├── build_pptx.py                     (python-pptx slide builder)
+│   └── figures/                          (PNGs referenced by the report)
 │
 ├── audio-samples/
 │   ├── original/
 │   └── encoded/
 │
-└── deliverables/
-    ├── demo-video/
-    └── audio-clips/
+└── deliverables/                         ← Final submission artefacts
+    ├── Spatial_Audio_Report.docx / .pdf
+    ├── Spatial_Audio_Presentation.pptx / .pdf
+    ├── Speaker_Notes.md
+    ├── audio-clips/
+    └── demo-video/
 ```
 
 ---
@@ -260,31 +265,42 @@ If no files are found, the test generates synthetic audio for demo purposes.
 
 ## Assembling the Final Report
 
-### Report (.docx)
+The canonical sources live in `deliverables/`. Both are generated from the Python builders under `report/` and exported to PDF via LibreOffice.
 
-The report template is at `report/Spatial_Audio_Report.docx`. It contains:
-- Full academic structure (Introduction through Conclusions)
-- 9 figure placeholders marked `[INSERT FROM PHASE X]`
-- Placeholder text for team names and specific results
+### Report (.docx → .pdf)
 
-**To complete:**
-1. Open in Word/Google Docs
-2. Replace `[Team Member Names]` with actual names
-3. Insert figures from Phase 2, 4, 5 outputs into the marked placeholders
-4. Update the transparency point table with your actual results
-5. Refine discussion text based on your findings
-6. Export as PDF for submission
+Source: `deliverables/Spatial_Audio_Report.docx` — built by `report/build_report.py`.
+Layout: Times New Roman 12pt, single column, max 20 pages, five-section structure.
 
-### Presentation (.pptx)
+**To rebuild from scratch:**
+```bash
+pip install python-docx
+python report/build_report.py
+libreoffice --headless --convert-to pdf deliverables/Spatial_Audio_Report.docx --outdir deliverables/
+```
 
-The presentation is at `report/Spatial_Audio_Presentation.pptx` (18 slides, ~10 min). It uses Google colors and has placeholder boxes for figures/screenshots.
+**To finalise manually (after dropping figures into `report/figures/`):**
+1. Open `deliverables/Spatial_Audio_Report.docx` in Word
+2. Verify each figure placeholder has been replaced with the real PNG
+3. Update any pilot numbers with your final ABX/stress results
+4. Export as PDF over `deliverables/Spatial_Audio_Report.pdf`
 
-**To complete:**
-1. Open in PowerPoint or Google Slides
-2. Replace placeholder boxes with actual screenshots and plots
-3. Update statistics with your real results
-4. If using Google Slides: change font to "Google Sans" (Product Sans is used as placeholder)
-5. Practice the 10-minute delivery
+### Presentation (.pptx → .pdf)
+
+Source: `deliverables/Spatial_Audio_Presentation.pptx` — built by `report/build_pptx.py`.
+Layout: 10 slides, neumorphic theme, Google Sans / Roboto, ~5 min total.
+
+**To rebuild from scratch:**
+```bash
+pip install python-pptx
+python report/build_pptx.py
+libreoffice --headless --convert-to pdf deliverables/Spatial_Audio_Presentation.pptx --outdir deliverables/
+```
+
+**To finalise manually:**
+1. Open `deliverables/Spatial_Audio_Presentation.pptx` in PowerPoint or Google Slides
+2. Insert `rd_curve_odg.png` on Slide 5 (Codec Comparison Results)
+3. Practise the 5-minute delivery against `deliverables/Speaker_Notes.md`
 
 ---
 
