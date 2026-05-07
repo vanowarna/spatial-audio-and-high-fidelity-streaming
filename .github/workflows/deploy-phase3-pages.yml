@@ -1,8 +1,10 @@
 name: Deploy site to GitHub Pages
 
+# Triggers on pushes to either main or develop, plus manual runs.
+# If you want to gate deploys to main only, drop "develop" from the list below.
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   workflow_dispatch:
 
 permissions:
@@ -10,15 +12,12 @@ permissions:
   pages: write
   id-token: write
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 concurrency:
   group: pages
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  build-and-deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -27,14 +26,64 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Build a curated _site/ directory containing only what should be public.
+      # We exclude ref-docs (large reference material), node_modules (build deps),
+      # and stale build artefacts under report/.
+      - name: Build _site
+        run: |
+          set -eux
+          mkdir -p _site
+
+          # Homepage + top-level docs
+          cp index.html      _site/
+          cp README.md       _site/ || true
+          cp HOW-TO-RUN.md   _site/ || true
+
+          # Source apps (live player + ABX test + notebooks)
+          mkdir -p _site/src
+          if [ -d src ]; then
+            rsync -a \
+              --exclude 'node_modules/' \
+              --exclude '.devcontainer/' \
+              --exclude '*.log' \
+              src/ _site/src/
+          fi
+
+          # Final deliverables (PDFs, PPTX, DOCX, speaker notes)
+          if [ -d deliverables ]; then
+            mkdir -p _site/deliverables
+            rsync -a \
+              --exclude '~$*' \
+              --exclude '.~lock.*' \
+              --exclude '*.tmp' \
+              deliverables/ _site/deliverables/
+          fi
+
+          # Audio samples are useful for the live player to load
+          if [ -d audio-samples ]; then
+            mkdir -p _site/audio-samples
+            rsync -a audio-samples/ _site/audio-samples/
+          fi
+
+          # Optional: include a small subset of report/figures used by the homepage
+          if [ -d report/figures ]; then
+            mkdir -p _site/report
+            rsync -a report/figures/ _site/report/figures/ || true
+          fi
+
+          # Add a .nojekyll so paths starting with _ aren't ignored
+          touch _site/.nojekyll
+
+          du -sh _site || true
+          ls -la _site
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload site
+      - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Whole repo: index.html (homepage) → src/* (player, ABX) → deliverables/* (PDFs)
-          path: .
+          path: _site
 
       - name: Deploy to GitHub Pages
         id: deployment
