@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spatial Audio &amp; High-Fidelity Streaming · Project 4</title>
+<meta name="description" content="A Web Audio API spatial audio player with HRTF rendering, codec comparison, and network stress testing — Multimedia Communication, Chulalongkorn University.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --surface: #E6EAF0;
+    --surface-2: #EEF1F6;
+    --surface-3: #F2F5FA;
+    --shadow-light: rgba(255,255,255,0.85);
+    --shadow-dark: rgba(170,180,200,0.55);
+    --text-primary: #1F2433;
+    --text-secondary: #525B6E;
+    --text-dim: #8C96A8;
+    --google-blue:   #4285F4;
+    --google-red:    #EA4335;
+    --google-yellow: #FBBC04;
+    --google-green:  #34A853;
+    --radius: 22px;
+    --radius-sm: 14px;
+    --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+    --font-head: 'Google Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-body: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--surface);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100%;
+  }
+
+  body { padding: 48px 24px 72px; }
+
+  .container { max-width: 1180px; margin: 0 auto; }
+
+  /* Neumorphic surface */
+  .neu {
+    background: var(--surface-2);
+    border-radius: var(--radius);
+    box-shadow:
+      9px 9px 24px var(--shadow-dark),
+      -9px -9px 24px var(--shadow-light);
+  }
+  .neu-sm { border-radius: var(--radius-sm); box-shadow: 6px 6px 16px var(--shadow-dark), -6px -6px 16px var(--shadow-light); }
+  .neu-flat { box-shadow: inset 4px 4px 10px var(--shadow-dark), inset -4px -4px 10px var(--shadow-light); }
+
+  /* HEADER */
+  header.hero {
+    padding: 48px 56px 56px;
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .dots { display: flex; gap: 10px; margin-bottom: 22px; }
+  .dot { width: 18px; height: 18px; border-radius: 50%; box-shadow: 3px 3px 8px var(--shadow-dark), -3px -3px 8px var(--shadow-light); }
+  .dot.b { background: var(--google-blue); }
+  .dot.r { background: var(--google-red); }
+  .dot.y { background: var(--google-yellow); }
+  .dot.g { background: var(--google-green); }
+  .tag {
+    display: inline-block;
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    color: var(--google-blue);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  h1 {
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: clamp(32px, 5vw, 52px);
+    line-height: 1.1;
+    color: var(--text-primary);
+    margin-bottom: 14px;
+    letter-spacing: -0.5px;
+  }
+  .lede {
+    font-size: clamp(15px, 1.4vw, 18px);
+    color: var(--text-secondary);
+    max-width: 720px;
+    margin-bottom: 26px;
+  }
+  .meta {
+    display: flex; flex-wrap: wrap; gap: 8px 18px;
+    font-size: 13px; color: var(--text-dim);
+  }
+  .meta strong { color: var(--text-secondary); font-weight: 500; }
+
+  /* SECTION TITLES */
+  h2.section {
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 22px;
+    margin: 36px 6px 18px;
+    color: var(--text-primary);
+  }
+  .section-sub { color: var(--text-dim); font-size: 13px; margin: -10px 6px 16px; }
+
+  /* CARD GRIDS */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 22px;
+  }
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 22px;
+  }
+
+  .card {
+    padding: 24px 26px;
+    transition: transform var(--transition), box-shadow var(--transition);
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  a.card:hover { transform: translateY(-3px); box-shadow: 12px 12px 28px var(--shadow-dark), -12px -12px 28px var(--shadow-light); }
+
+  .card .icon-wrap {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    margin-bottom: 16px;
+    color: white;
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 18px;
+    box-shadow: 4px 4px 10px var(--shadow-dark), -4px -4px 10px var(--shadow-light);
+  }
+  .card h3 {
+    font-family: var(--font-head);
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .card p { font-size: 13.5px; color: var(--text-secondary); }
+  .card .cta {
+    margin-top: 14px; display: flex; align-items: center; gap: 6px;
+    font-family: var(--font-head); font-size: 13px; font-weight: 500; color: var(--google-blue);
+  }
+  .card .cta::after { content: '→'; transition: transform var(--transition); }
+  a.card:hover .cta::after { transform: translateX(4px); }
+
+  .icon-blue   { background: var(--google-blue); }
+  .icon-red    { background: var(--google-red); }
+  .icon-yellow { background: var(--google-yellow); color: var(--text-primary); }
+  .icon-green  { background: var(--google-green); }
+
+  /* PHASES */
+  .phases { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+  .phase { padding: 18px 20px; }
+  .phase .num {
+    font-family: var(--font-head); font-weight: 700; font-size: 12px;
+    letter-spacing: 1px; color: var(--text-dim); margin-bottom: 8px;
+  }
+  .phase h4 { font-family: var(--font-head); font-size: 15px; margin-bottom: 4px; }
+  .phase p { font-size: 12.5px; color: var(--text-secondary); }
+  .phase.done { border-left: 4px solid var(--google-green); }
+  .phase.wip  { border-left: 4px solid var(--google-yellow); }
+
+  /* CHIPS */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .chip {
+    padding: 6px 14px; border-radius: 999px;
+    font-family: var(--font-head); font-size: 12px; font-weight: 500;
+    color: var(--text-secondary); background: var(--surface-2);
+    box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+  }
+
+  /* FOOTER */
+  footer {
+    margin-top: 48px;
+    padding: 28px 32px;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 12px;
+  }
+  footer a { color: var(--google-blue); text-decoration: none; }
+
+  /* DEMO ROW */
+  .demo {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 22px;
+    align-items: stretch;
+  }
+  .demo .panel { padding: 28px 30px; }
+  .demo .panel h3 { font-family: var(--font-head); font-size: 22px; margin-bottom: 8px; }
+  .demo .panel p  { color: var(--text-secondary); font-size: 14px; margin-bottom: 16px; }
+  .demo .btn-row { display: flex; flex-wrap: wrap; gap: 10px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-family: var(--font-head); font-weight: 500; font-size: 13.5px;
+    text-decoration: none; color: white;
+    background: var(--google-blue);
+    box-shadow: 4px 4px 10px var(--shadow-dark), -4px -4px 10px var(--shadow-light);
+    transition: transform var(--transition);
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn.secondary { background: var(--surface-2); color: var(--text-primary); }
+  .btn.green { background: var(--google-green); }
+  .btn.red { background: var(--google-red); }
+
+  @media (max-width: 720px) {
+    body { padding: 24px 14px 60px; }
+    header.hero { padding: 30px 24px; }
+    .demo { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- HERO -->
+    <header class="hero neu">
+      <div class="dots">
+        <span class="dot b"></span>
+        <span class="dot r"></span>
+        <span class="dot y"></span>
+        <span class="dot g"></span>
+      </div>
+      <span class="tag">Project 4 · 2102571 Multimedia Communication</span>
+      <h1>Spatial Audio &amp;<br>High-Fidelity Streaming</h1>
+      <p class="lede">
+        A Web Audio API spatial player with HRTF binaural rendering, a perceptual codec comparison
+        (MP3 / AAC / Opus), and a network stress study that measures when spatial immersion breaks.
+      </p>
+      <div class="meta">
+        <span><strong>Authors:</strong> Yuwadee Tongkong · Vanodhya Warnasooriya · Chanakan Hambleton</span>
+        <span><strong>Department of Electrical Engineering</strong></span>
+        <span>Chulalongkorn University</span>
+        <span>May 2026</span>
+      </div>
+      <div class="chips">
+        <span class="chip">Web Audio API</span>
+        <span class="chip">HRTF</span>
+        <span class="chip">Three.js</span>
+        <span class="chip">FFmpeg · libfdk-aac · libopus</span>
+        <span class="chip">PESQ / ODG</span>
+        <span class="chip">ABX listening test</span>
+      </div>
+    </header>
+
+    <!-- LIVE DEMO -->
+    <h2 class="section">Live experience</h2>
+    <p class="section-sub">Open in a desktop browser with headphones for the full effect.</p>
+    <div class="demo">
+      <div class="panel neu">
+        <h3>Spatial Audio Lab</h3>
+        <p>
+          Drag sound sources in 3D space, switch codec mid-playback, and inject packet loss or jitter
+          to feel the spatial scene collapse. Built with the Web Audio API's HRTF panner and Three.js.
+        </p>
+        <div class="btn-row">
+          <a class="btn" href="src/phase3-spatial-player/" target="_blank" rel="noopener">▶ Open the player</a>
+          <a class="btn secondary" href="src/phase4-abx-testing/" target="_blank" rel="noopener">🎧 Take the ABX test</a>
+        </div>
+      </div>
+
+      <div class="panel neu">
+        <h3>Final deliverables</h3>
+        <p>The 20-page final report and the 5-minute presentation, both in PDF.</p>
+        <div class="btn-row">
+          <a class="btn green" href="deliverables/Spatial_Audio_Report.pdf" target="_blank" rel="noopener">📄 Report (PDF)</a>
+          <a class="btn red" href="deliverables/Spatial_Audio_Presentation.pdf" target="_blank" rel="noopener">🎤 Slides (PDF)</a>
+          <a class="btn secondary" href="deliverables/Spatial_Audio_Presentation.pptx">PPTX</a>
+          <a class="btn secondary" href="deliverables/Spatial_Audio_Report.docx">DOCX</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- NAV CARDS -->
+    <h2 class="section">Explore the project</h2>
+    <p class="section-sub">Each phase is reproducible from a single notebook or web app.</p>
+    <div class="grid-3">
+
+      <a class="card neu" href="src/phase2-codec-analysis/Phase2_Codec_Analysis.ipynb">
+        <div class="icon-wrap icon-blue">2</div>
+        <h3>Codec Analysis</h3>
+        <p>FFmpeg pipeline · spectrograms · SNR &amp; ODG metrics across 8 bitrates × 3 codecs.</p>
+        <span class="cta">Open notebook</span>
+      </a>
+
+      <a class="card neu" href="src/phase3-spatial-player/" target="_blank" rel="noopener">
+        <div class="icon-wrap icon-red">3</div>
+        <h3>Spatial Audio Player</h3>
+        <p>Web Audio API · HRTF panner · live codec switching · network stress sliders.</p>
+        <span class="cta">Open the live player</span>
+      </a>
+
+      <a class="card neu" href="src/phase4-abx-testing/" target="_blank" rel="noopener">
+        <div class="icon-wrap icon-yellow">4</div>
+        <h3>ABX Listening Test</h3>
+        <p>Web-based ABX protocol with CSV logging and a Colab analysis notebook.</p>
+        <span class="cta">Take the test</span>
+      </a>
+
+      <a class="card neu" href="src/phase5-streaming-stress-test/Phase5_Stress_Test.ipynb">
+        <div class="icon-wrap icon-green">5</div>
+        <h3>Network Stress</h3>
+        <p>Packet loss &amp; jitter sweep across mono / stereo / spatial — finds the breakdown point.</p>
+        <span class="cta">Open notebook</span>
+      </a>
+
+      <a class="card neu" href="https://github.com/vanowarna/spatial-audio-and-high-fidelity-streaming">
+        <div class="icon-wrap icon-blue">⌨</div>
+        <h3>Source code</h3>
+        <p>Vanilla JS spatial player, Python notebooks, and the report build pipeline.</p>
+        <span class="cta">View on GitHub</span>
+      </a>
+
+      <a class="card neu" href="HOW-TO-RUN.md">
+        <div class="icon-wrap icon-red">📘</div>
+        <h3>How to reproduce</h3>
+        <p>Step-by-step run guide for every phase, including Codespaces and Vercel deployment.</p>
+        <span class="cta">Read HOW-TO-RUN</span>
+      </a>
+
+    </div>
+
+    <!-- PHASE TIMELINE -->
+    <h2 class="section">Phase timeline</h2>
+    <p class="section-sub">Six phases over four weeks; this submission ships Phases 1–6.</p>
+    <div class="phases">
+      <div class="phase neu-sm done">
+        <div class="num">PHASE 1</div>
+        <h4>Research &amp; setup</h4>
+        <p>Tooling, HRTF dataset, audio corpus.</p>
+      </div>
+      <div class="phase neu-sm done">
+        <div class="num">PHASE 2</div>
+        <h4>Codec &amp; spectral analysis</h4>
+        <p>FFmpeg sweep · RD curves · ODG.</p>
+      </div>
+      <div class="phase neu-sm done">
+        <div class="num">PHASE 3</div>
+        <h4>Spatial audio player</h4>
+        <p>Web Audio API · HRTF · live deploy.</p>
+      </div>
+      <div class="phase neu-sm wip">
+        <div class="num">PHASE 4</div>
+        <h4>ABX listening test</h4>
+        <p>Protocol designed; full study in progress.</p>
+      </div>
+      <div class="phase neu-sm done">
+        <div class="num">PHASE 5</div>
+        <h4>Streaming stress test</h4>
+        <p>Loss · jitter · breakdown point.</p>
+      </div>
+      <div class="phase neu-sm done">
+        <div class="num">PHASE 6</div>
+        <h4>Report &amp; demo</h4>
+        <p>Final PDF · 5-min slide deck · MP4 demo.</p>
+      </div>
+    </div>
+
+    <footer>
+      <p>
+        Submission: 2102571 Multimedia Communication in the 21<sup>st</sup> Century · Chulalongkorn University ·
+        <a href="https://github.com/vanowarna/spatial-audio-and-high-fidelity-streaming">GitHub repository</a>
+      </p>
+    </footer>
+
+  </div>
+</body>
+</html>
