@@ -1,4 +1,4 @@
-# Spatial Audio & High-Fidelity Streaming
+# Spatial Audio & High-Fidelity Streaming.
 
 **Course:** 2102571 — Multimedia Communication in the 21st Century
 **Institution:** Department of Electrical Engineering · Faculty of Engineering · Chulalongkorn University
